@@ -2,11 +2,11 @@
 // Talks to the Rigital backend running at http://localhost:3000
 // Matches routes/auth.js exactly: POST /signup, POST /login, GET /me
 
-const API_BASE_URL = 'http://localhost:3000/api';
+const API_BASE_URL = "https://rigi-server.onrender.com";
 
 const RigitalAPI = {
   async signup(fullName, email, password) {
-    const res = await fetch(`${API_BASE_URL}/auth/signup`, {
+    const res = await fetch(`${API_BASE_URL}/api/auth/signup`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ fullName, email, password })
@@ -17,7 +17,7 @@ const RigitalAPI = {
   },
 
   async login(email, password) {
-    const res = await fetch(`${API_BASE_URL}/auth/login`, {
+    const res = await fetch(`${API_BASE_URL}/api/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password })
@@ -31,7 +31,7 @@ const RigitalAPI = {
     const token = localStorage.getItem('rigital_token');
     if (!token) return null;
 
-    const res = await fetch(`${API_BASE_URL}/auth/me`, {
+    const res = await fetch(`${API_BASE_URL}/api/auth/me`, {
       headers: { Authorization: `Bearer ${token}` }
     });
     if (!res.ok) return null;
@@ -39,8 +39,9 @@ const RigitalAPI = {
     return data.user;
   },
 
-  logout() {
-    localStorage.removeItem('rigital_token');
-    localStorage.removeItem('rigital_user');
-  }
+ logout() {
+  localStorage.removeItem('rigital_token');
+  localStorage.removeItem('rigital_user');
+  localStorage.removeItem('rigital_session');
+}
 };
