@@ -209,6 +209,15 @@ svg{display:block;}
   background:var(--panel-2);
   box-shadow:0 0 0 3px var(--teal-dim);
 }
+.field input.has-error{
+  border-color:var(--danger);
+}
+.field-error{
+  color:var(--danger);
+  font-size:12.5px;
+  margin-top:6px;
+  min-height:16px;
+}
 .field-toggle{
   position:absolute; right:12px; top:50%; transform:translateY(-50%);
   color:var(--text-mute);
@@ -244,6 +253,16 @@ svg{display:block;}
   box-shadow:0 8px 24px -8px rgba(76,86,224,0.35);
 }
 .btn-primary:hover{ filter:brightness(1.08); transform:translateY(-1px); }
+.btn-primary:disabled{ opacity:.7; cursor:not-allowed; transform:none; }
+
+.form-status{
+  text-align:center;
+  font-size:13.5px;
+  margin-bottom:16px;
+  min-height:18px;
+}
+.form-status.success{ color:var(--teal); }
+.form-status.error{ color:var(--danger); }
 
 .divider{
   display:flex; align-items:center; gap:12px;
@@ -310,25 +329,29 @@ svg{display:block;}
         <p>Access your identity, CRM and marketing tools.</p>
       </div>
 
-      <form>
+      <p id="formStatus" class="form-status"></p>
+
+      <form id="signinForm">
         <div class="field">
           <label for="email">Email address</label>
           <div class="field-input-wrap">
             <input type="email" id="email" placeholder="you@company.com" required>
           </div>
+          <div class="field-error" id="err-email"></div>
         </div>
 
         <div class="field">
           <label for="password">Password</label>
           <div class="field-input-wrap">
             <input type="password" id="password" placeholder="Your password" required>
-            <button type="button" class="field-toggle" aria-label="Show password">
+            <button type="button" class="field-toggle toggle-visibility" data-target="password" aria-label="Show password">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/>
                 <circle cx="12" cy="12" r="3"/>
               </svg>
             </button>
           </div>
+          <div class="field-error" id="err-password"></div>
         </div>
 
         <div class="field-row">
@@ -336,17 +359,17 @@ svg{display:block;}
           <a href="#" class="forgot-link">Forgot password?</a>
         </div>
 
-        <button type="submit" class="btn-primary">Log In</button>
+        <button type="submit" class="btn-primary" id="submitBtn">Log In</button>
       </form>
 
       <div class="divider">or continue with</div>
 
       <div class="oauth-row">
-        <button class="btn-oauth" type="button">
+        <button class="btn-oauth btn-social" type="button" data-provider="google">
           <svg viewBox="0 0 24 24"><path fill="#4285F4" d="M23.52 12.27c0-.85-.08-1.67-.22-2.45H12v4.64h6.47a5.53 5.53 0 0 1-2.4 3.63v3h3.88c2.27-2.09 3.57-5.17 3.57-8.82z"/><path fill="#34A853" d="M12 24c3.24 0 5.96-1.07 7.95-2.91l-3.88-3c-1.08.73-2.46 1.16-4.07 1.16-3.13 0-5.78-2.11-6.73-4.96H1.27v3.1A12 12 0 0 0 12 24z"/><path fill="#FBBC05" d="M5.27 14.29a7.2 7.2 0 0 1 0-4.58v-3.1H1.27a12 12 0 0 0 0 10.78l4-3.1z"/><path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.44-3.44C17.95 1.19 15.24 0 12 0A12 12 0 0 0 1.27 6.61l4 3.1C6.22 6.86 8.87 4.75 12 4.75z"/></svg>
           Google
         </button>
-        <button class="btn-oauth" type="button">
+        <button class="btn-oauth btn-social" type="button" data-provider="microsoft">
           <svg viewBox="0 0 24 24"><path fill="#F35325" d="M1 1h10v10H1z"/><path fill="#81BC06" d="M13 1h10v10H13z"/><path fill="#05A6F0" d="M1 13h10v10H1z"/><path fill="#FFBA08" d="M13 13h10v10H13z"/></svg>
           Microsoft
         </button>
@@ -358,38 +381,11 @@ svg{display:block;}
 
 </div>
 <script src="js/api.js"></script>
-<script src="js/user-session.js"></script>
+<script src="js/auth.js"></script>
 <script>
-  // Toggle password visibility
-  document.querySelectorAll('.field-toggle').forEach(function(btn){
-    btn.addEventListener('click', function(){
-      var input = btn.previousElementSibling;
-      var showing = input.type === 'text';
-      input.type = showing ? 'password' : 'text';
-
-      var eyeOpen = '<path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/>';
-      var eyeClosed = '<path d="M17.94 17.94A10.94 10.94 0 0 1 12 19c-7 0-11-7-11-7a18.5 18.5 0 0 1 4.22-5.06M9.9 4.24A10.94 10.94 0 0 1 12 4c7 0 11 7 11 7a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><path d="M1 1l22 22"/>';
-
-      btn.querySelector('svg').innerHTML = showing ? eyeOpen : eyeClosed;
-      btn.setAttribute('aria-label', showing ? 'Show password' : 'Hide password');
-    });
-  });
-
-  // Handle sign in submit
-  document.querySelector('form').addEventListener('submit', async function(e){
-  e.preventDefault();
-  var email = document.getElementById('email').value;
-  var password = document.getElementById('password').value;
-
-  try {
-    var data = await RigitalAPI.login(email, password);
-    localStorage.setItem('rigital_token', data.token);
-    if (window.RigitalUser) window.RigitalUser.set(data.user.fullName);
-    window.location.href = 'dashboard.html';
-  } catch (err) {
-    alert(err.message);
-  }
-});
+  // Toggle password visibility (kept separate — auth.js already binds
+  // .toggle-visibility clicks too, but this stays harmless/idempotent
+  // since it just flips input type based on current state)
 </script>
 
 </body>

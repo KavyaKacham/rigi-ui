@@ -23,11 +23,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-  function startSession(user, token) {
-    localStorage.setItem('rigital_user', JSON.stringify(user));
-    localStorage.setItem('rigital_session', 'active');
-    if (token) localStorage.setItem('rigital_token', token);
-  }
+ function startSession(user, token) {
+  localStorage.setItem('rigital_user', JSON.stringify(user));
+  localStorage.setItem('rigital_session', 'active');
+  if (token) localStorage.setItem('rigital_token', token);
+  console.log('DEBUG startSession wrote:', localStorage.getItem('rigital_session'), localStorage.getItem('rigital_user'));
+}
 
   function goToApp() {
     window.location.href = POST_LOGIN_REDIRECT;
@@ -89,7 +90,7 @@ document.addEventListener('DOMContentLoaded', () => {
         startSession(data.user, data.token);
         status.textContent = 'Account created — redirecting…';
         status.classList.add('success');
-        setTimeout(goToApp, 500);
+        setTimeout(goToApp, 8000);
       } catch (err) {
         status.textContent = err.message || 'Signup failed. Please try again.';
         status.classList.add('error');
@@ -140,7 +141,7 @@ document.addEventListener('DOMContentLoaded', () => {
         startSession(data.user, data.token);
         status.textContent = 'Logged in — redirecting…';
         status.classList.add('success');
-        setTimeout(goToApp, 500);
+        setTimeout(goToApp, 8000);
       } catch (err) {
         status.textContent = err.message || 'Invalid email or password.';
         status.classList.add('error');

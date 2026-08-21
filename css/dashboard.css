@@ -3,6 +3,9 @@
    ========================================================================== */
 
 body.app { background: var(--bg-app); }
+.nav-hidden {
+  display: none !important;
+}
 
 .app-shell { display: flex; min-height: 100vh; }
 
